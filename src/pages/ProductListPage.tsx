@@ -16,7 +16,13 @@ export default function ProductListPage() {
       .catch(() => setError('Failed to load products'))
       .finally(() => setLoading(false));
   }, []);
-console.log("products", products);
+
+  const getProductImage = (product: Product) => {
+    if (product.images && product.images.length > 0) {
+      return `http://localhost:3000${product.images[0].imageUrl}`;
+    }
+    return '/images/dummy_image.jpg';
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -62,38 +68,50 @@ console.log("products", products);
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {products.map((product) => {
             const inStock = product.variants.some((v) => v.stock > 0);
+            const imageUrl = getProductImage(product);
+                        
             return (
               <Link
                 key={product.id}
                 to={`/products/${product.id}`}
-                className="block bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition"
+                className="block bg-white rounded-xl border border-gray-200 hover:shadow-md transition overflow-hidden"
               >
-                <h3 className="font-semibold text-gray-900 mb-1">
-                  {product.name}
-                </h3>
+                <div className="h-48 overflow-hidden bg-gray-100">
+                  <img
+                    src={imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                
+                <div className="p-5">
+                  <h3 className="font-semibold text-gray-900 mb-1">
+                    {product.name}
+                  </h3>
 
-                {product.description && (
-                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">
-                    {product.description}
+                  {product.description && (
+                    <p className="text-xs text-gray-500 mb-3 line-clamp-2">
+                      {product.description}
+                    </p>
+                  )}
+
+                  <p className="text-xl font-bold text-gray-900 mb-3">
+                    ${Number(product.basePrice).toFixed(2)}
                   </p>
-                )}
 
-                <p className="text-xl font-bold text-gray-900 mb-3">
-                  ${Number(product.basePrice).toFixed(2)}
-                </p>
-
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>
-                    {product.variants.length} variant
-                    {product.variants.length !== 1 ? 's' : ''}
-                  </span>
-                  <span
-                    className={`font-medium ${
-                      inStock ? 'text-green-600' : 'text-red-500'
-                    }`}
-                  >
-                    {inStock ? 'In stock' : 'Out of stock'}
-                  </span>
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>
+                      {product.variants.length} variant
+                      {product.variants.length !== 1 ? 's' : ''}
+                    </span>
+                    <span
+                      className={`font-medium ${
+                        inStock ? 'text-green-600' : 'text-red-500'
+                      }`}
+                    >
+                      {inStock ? 'In stock' : 'Out of stock'}
+                    </span>
+                  </div>
                 </div>
               </Link>
             );

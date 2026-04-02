@@ -22,18 +22,19 @@ const schema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
   basePrice: z.number().min(0, 'Price must be non-negative'),
+  images: z.array(z.instanceof(File)).min(1, 'At least one product image is required'),
   variants: z.array(
     z.object({
       stock: z.number().min(0, 'Stock must be non-negative'),
       color: z.string().optional(),
       size: z.string().optional(),
       material: z.string().optional(),
-      priceOverride: z.number().optional(), // Make it optional to match FormData
+      priceOverride: z.number().optional(),
     })
   ),
 });
 
-type FormData = z.infer<typeof schema>; // Infer type FROM schema
+type FormData = z.infer<typeof schema>;
 
 interface ApiVariant {
   color?: string;
@@ -48,16 +49,19 @@ interface ApiProductPayload {
   description?: string;
   basePrice: number;
   variants: ApiVariant[];
+  images?: File[];
 }
 
 export default function CreateProductPage() {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState('');
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const {
     register,
     control,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -65,6 +69,7 @@ export default function CreateProductPage() {
       name: '',
       description: '',
       basePrice: 0,
+      images: [],
       variants: [{ stock: 1, color: '', size: '', material: '', priceOverride: undefined }],
     },
   });
@@ -73,6 +78,33 @@ export default function CreateProductPage() {
     control,
     name: 'variants',
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      setValue('images', files);
+      
+      const previews = files.map(file => URL.createObjectURL(file));
+      setImagePreviews(previews);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const currentImages = imagePreviews;
+    URL.revokeObjectURL(currentImages[index]);
+    
+    const newPreviews = currentImages.filter((_, i) => i !== index);
+    setImagePreviews(newPreviews);
+    
+    const formImages = (document.getElementById('images-input') as HTMLInputElement)?.files;
+    if (formImages) {
+      const newFiles = Array.from(formImages).filter((_, i) => i !== index);
+      const dataTransfer = new DataTransfer();
+      newFiles.forEach(file => dataTransfer.items.add(file));
+      (document.getElementById('images-input') as HTMLInputElement).files = dataTransfer.files;
+      setValue('images', newFiles);
+    }
+  };
 
   const transformToApiPayload = (data: FormData): ApiProductPayload => {
     return {
@@ -86,6 +118,7 @@ export default function CreateProductPage() {
         stock: variant.stock,
         priceOverride: variant.priceOverride,
       })),
+      images: data.images,
     };
   };
 
@@ -94,6 +127,7 @@ export default function CreateProductPage() {
     try {
       const payload = transformToApiPayload(data);
       const product = await productsApi.create(payload);
+      imagePreviews.forEach(preview => URL.revokeObjectURL(preview));
       navigate(`/products/${product.id}`);
     } catch (err: any) {
       const msg = err.response?.data?.message;
@@ -164,7 +198,7 @@ export default function CreateProductPage() {
                 type="number"
                 step="0.01"
                 min="0.01"
-                {...register('basePrice', { valueAsNumber: true })} // ✅ FIXED
+                {...register('basePrice', { valueAsNumber: true })}
                 placeholder="19.99"
                 className={`${inputClass(!!errors.basePrice)} max-w-[200px]`}
               />
@@ -172,6 +206,73 @@ export default function CreateProductPage() {
                 <p className="text-red-500 text-xs mt-1">
                   {errors.basePrice.message}
                 </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Product Images *
+              </label>
+              <div 
+                className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-500 transition cursor-pointer"
+                onClick={() => document.getElementById('images-upload')?.click()}
+              >
+                <div className="space-y-1 text-center">
+                  <svg
+                    className="mx-auto h-12 w-12 text-gray-400"
+                    stroke="currentColor"
+                    fill="none"
+                    viewBox="0 0 48 48"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <div className="flex text-sm text-gray-600">
+                    <span className="bg-white rounded-md font-medium text-gray-900 hover:text-gray-700">
+                      Upload files
+                    </span>
+                    <p className="pl-1">or drag and drop</p>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    PNG, JPG, GIF up to 10MB
+                  </p>
+                </div>
+                <input
+                  id="images-upload"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+              </div>
+
+              {imagePreviews.length > 0 && (
+                <div className="mt-4 grid grid-cols-4 gap-4">
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        className="h-24 w-full object-cover rounded-lg border border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition shadow-md opacity-0 group-hover:opacity-100"
+                      >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
 
@@ -251,7 +352,7 @@ export default function CreateProductPage() {
                         <input
                           type="number"
                           min="0"
-                          {...register(`variants.${i}.stock`, { valueAsNumber: true })} // ✅ FIXED
+                          {...register(`variants.${i}.stock`, { valueAsNumber: true })}
                           className={inputClass(
                             !!errors.variants?.[i]?.stock,
                           )}
@@ -270,7 +371,7 @@ export default function CreateProductPage() {
                           type="number"
                           step="0.01"
                           min="0"
-                          {...register(`variants.${i}.priceOverride`, { valueAsNumber: true })} // ✅ FIXED
+                          {...register(`variants.${i}.priceOverride`, { valueAsNumber: true })}
                           className={inputClass()}
                         />
                       </div>

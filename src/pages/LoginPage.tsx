@@ -25,19 +25,29 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side: hero image */}
       <div
-        className="hidden md:flex w-1/2 bg-cover bg-center"
+        className="hidden md:flex w-1/2 bg-cover bg-center relative"
         style={{ backgroundImage: "url('/images/fashion-hero.jpg')" }}
       >
-        <div className="bg-black bg-opacity-30 w-full h-full flex items-center justify-center">
-          <h1 className="text-white text-4xl font-bold px-4 text-center">
-            Welcome to MO Fashion Store
+        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+
+        <div className="relative z-10 w-full h-full flex flex-col items-center justify-center text-center px-6">
+          
+          <div className="p-2 rounded-lg inline-block mb-2">
+            <img
+              src="/logo/logo.png"
+              alt="MO Marketplace Logo"
+              className="w-full h-auto"
+            />
+          </div>
+
+          <h1 className="text-white text-4xl font-bold mb-3">
+            Welcome to the MO Marketplace
           </h1>
+
         </div>
       </div>
 
-      {/* Right side: login form */}
       <div className="flex-1 flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full bg-white p-10 rounded-2xl shadow-lg">
           <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Sign In</h2>

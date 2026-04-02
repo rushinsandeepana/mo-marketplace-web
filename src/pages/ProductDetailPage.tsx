@@ -12,6 +12,8 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     if (!id) return;
@@ -20,6 +22,32 @@ export default function ProductDetailPage() {
       .then(setProduct)
       .finally(() => setLoading(false));
   }, [id]);
+
+  const nextImage = () => {
+    const imagesLength = product?.images?.length;
+    if (imagesLength && imagesLength > 0) {
+      setCurrentImageIndex((prev) => (prev + 1) % imagesLength);
+    }
+  };
+
+  const prevImage = () => {
+    const imagesLength = product?.images?.length;
+    if (imagesLength && imagesLength > 0) {
+      setCurrentImageIndex((prev) => (prev - 1 + imagesLength) % imagesLength);
+    }
+  };
+
+  const increaseQuantity = () => {
+    if (selectedVariant && quantity < selectedVariant.stock) {
+      setQuantity(prev => prev + 1);
+    }
+  };
+
+  const decreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(prev => prev - 1);
+    }
+  };
 
   if (loading) {
     return (
@@ -46,12 +74,18 @@ export default function ProductDetailPage() {
   const price = selectedVariant?.priceOverride
     ? Number(selectedVariant.priceOverride)
     : Number(product.basePrice);
+  
+  const totalAmount = price * quantity;
+
+  const currentImageUrl = product.images && product.images.length > 0
+    ? `http://localhost:3000${product.images[currentImageIndex].imageUrl}`
+    : '/images/no-image.png';
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-8">
         <Link
           to="/"
           className="text-sm text-gray-500 hover:text-gray-900 transition"
@@ -59,34 +93,89 @@ export default function ProductDetailPage() {
           ← Back to products
         </Link>
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-8 mt-4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {product.name}
-          </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-4">
+            <div className="relative">
+              <img
+                src={currentImageUrl}
+                alt={product.name}
+                className="w-full h-96 object-cover rounded-lg"
+              />
+              
+              {product.images && product.images.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition"
+                  >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition"
+                  >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </>
+              )}
+            </div>
 
-          {product.description && (
-            <p className="text-gray-500 text-sm mb-4">
-              {product.description}
-            </p>
-          )}
-
-          <p className="text-3xl font-bold text-gray-900 mb-6">
-            ${price.toFixed(2)}
-          </p>
-
-          <div className="mb-6">
-            <VariantSelector
-              variants={product.variants}
-              selected={selectedVariant}
-              onSelect={setSelectedVariant}
-            />
+            {product.images && product.images.length > 1 && (
+              <div className="flex gap-2 mt-4 overflow-x-auto">
+                {product.images.map((image, index) => (
+                  <button
+                    key={image.id}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition ${
+                      currentImageIndex === index
+                        ? 'border-gray-900 ring-2 ring-gray-900'
+                        : 'border-gray-200 hover:border-gray-400'
+                    }`}
+                  >
+                    <img
+                      src={`http://localhost:3000${image.imageUrl}`}
+                      alt={`Product ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          <QuickBuy
-            selectedVariant={selectedVariant}
-            productName={product.name}
-            price={price}
-          />
+          <div className="bg-white rounded-2xl border border-gray-200 p-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {product.name}
+            </h1>
+
+            {product.description && (
+              <p className="text-gray-500 text-sm mb-4">
+                {product.description}
+              </p>
+            )}
+
+            <div className="mb-6">
+              <VariantSelector
+                variants={product.variants}
+                selected={selectedVariant}
+                onSelect={setSelectedVariant}
+              />
+            </div>
+
+            <QuickBuy
+              selectedVariant={selectedVariant}
+              productName={product.name}
+              price={price}
+              quantity={quantity}
+              totalAmount={totalAmount}
+              onIncreaseQuantity={increaseQuantity}
+              onDecreaseQuantity={decreaseQuantity}
+            />
+          </div>
         </div>
       </div>
     </div>

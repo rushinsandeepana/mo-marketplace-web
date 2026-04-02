@@ -16,8 +16,17 @@ export interface Product {
   description: string | null;
   basePrice: number;
   variants: Variant[];
+  images?: ProductImage[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ProductImage {
+  id: string;
+  productId: string;
+  imageUrl: string;
+  createdAt: string;
+  length: number;
 }
 
 export interface CreateVariantInput {
@@ -33,6 +42,7 @@ export interface CreateProductInput {
   description?: string;
   basePrice: number;
   variants: CreateVariantInput[];
+  images?: File[];
 }
 
 export const productsApi = {
@@ -47,7 +57,23 @@ export const productsApi = {
   },
 
   create: async (data: CreateProductInput): Promise<Product> => {
-    const res = await client.post('/products', data);
+    const formData = new FormData();
+    formData.append('name', data.name);
+    if (data.description) formData.append('description', data.description);
+    formData.append('basePrice', data.basePrice.toString());
+    formData.append('variants', JSON.stringify(data.variants));
+    
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((image) => {
+        formData.append('images', image);
+      });
+    }
+    
+    const res = await client.post('/products', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return res.data;
   },
 

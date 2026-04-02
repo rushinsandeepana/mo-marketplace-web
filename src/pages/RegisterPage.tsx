@@ -70,18 +70,20 @@ export default function RegisterPage() {
         className="hidden md:flex w-1/2 bg-cover bg-center"
         style={{ backgroundImage: "url('/images/fashion-hero.jpg')" }}
       >
-        <div className="bg-black bg-opacity-40 w-full h-full flex flex-col items-center justify-center px-4">
-          <img src="/images/logo.png" alt="MO Fashion Store" className="mb-6 w-32" />
-          <h1 className="text-white text-4xl font-bold text-center">
-            Welcome to MO Fashion Store
+        <div className="bg-black bg-opacity-50 w-full h-full flex flex-col items-center justify-center px-4">
+          <div className="p-2 rounded-lg inline-block mb-2">
+            <img
+              src="/logo/logo.png"
+              alt="MO Marketplace Logo"
+              className="w-full h-auto"
+            />
+          </div>
+          <h1 className="text-white text-4xl font-bold mb-3">
+            Welcome to the MO Marketplace
           </h1>
-          <p className="text-white text-center mt-3 max-w-xs">
-            Discover the latest trends and styles in fashion.
-          </p>
         </div>
       </div>
 
-      {/* Right side: registration form */}
       <div className="flex-1 flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full bg-white p-10 rounded-2xl shadow-lg">
           <h2 className="text-3xl font-bold text-black mb-4 text-center">
@@ -171,7 +173,6 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
