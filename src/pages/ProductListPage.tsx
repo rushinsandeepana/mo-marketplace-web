@@ -8,6 +8,7 @@ export default function ProductListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     productsApi
@@ -19,7 +20,7 @@ export default function ProductListPage() {
 
   const getProductImage = (product: Product) => {
     if (product.images && product.images.length > 0) {
-      return `http://localhost:3000${product.images[0].imageUrl}`;
+      return `${BASE_URL}${product.images[0].imageUrl}`;
     }
     return '/images/dummy_image.jpg';
   };

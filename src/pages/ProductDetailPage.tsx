@@ -13,6 +13,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     if (!id) return;
@@ -99,7 +100,7 @@ export default function ProductDetailPage() {
 
   const currentImageUrl =
     product.images && product.images.length > 0
-      ? `http://localhost:3000${product.images[currentImageIndex].imageUrl}`
+      ? `${BASE_URL}${product.images[currentImageIndex].imageUrl}`
       : '/images/no-image.png';
 
   return (
@@ -147,7 +148,7 @@ export default function ProductDetailPage() {
                         ? 'border-gray-900 ring-2 ring-gray-900'
                         : 'border-gray-200 hover:border-gray-400'}`}>
                     <img
-                      src={`http://localhost:3000${image.imageUrl}`}
+                      src={`${BASE_URL}${image.imageUrl}`}
                       alt={`Product ${index + 1}`}
                       className="w-full h-full object-cover"
                     />

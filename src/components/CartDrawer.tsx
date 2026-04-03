@@ -104,7 +104,7 @@ export default function CartDrawer({ open, onClose }: Props) {
               >
                 {item.imageUrl && (
                   <img
-                    src={`http://localhost:3000${item.imageUrl}`}
+                    src={`${import.meta.env.VITE_BACKEND_API_URL}${item.imageUrl}`}
                     alt={item.productName}
                     className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                   />
