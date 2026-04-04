@@ -5,6 +5,7 @@ import type { Product, Variant } from '../api/products.api';
 import Navbar from '../components/Navbar';
 import VariantSelector from '../components/VariantSelector';
 import QuickBuy from '../components/QuickBuy';
+import { getImageUrl } from '../utils/imageUtils';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -13,7 +14,6 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     if (!id) return;
@@ -98,10 +98,13 @@ export default function ProductDetailPage() {
 
   const totalAmount = price * quantity;
 
-  const currentImageUrl =
-    product.images && product.images.length > 0
-      ? `${BASE_URL}${product.images[currentImageIndex].imageUrl}`
-      : '/images/no-image.png';
+  console.log('Image URL from DB (raw):', product.images?.[0]?.imageUrl);
+  console.log('Current image index:', currentImageIndex);
+
+  const currentImageUrl = product.images && product.images.length > 0
+    ? getImageUrl(product.images[currentImageIndex].imageUrl)
+    : '/images/no-image.png';
+    console.log('Final currentImageUrl:', currentImageUrl);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -148,7 +151,7 @@ export default function ProductDetailPage() {
                         ? 'border-gray-900 ring-2 ring-gray-900'
                         : 'border-gray-200 hover:border-gray-400'}`}>
                     <img
-                      src={`${BASE_URL}${image.imageUrl}`}
+                      src={getImageUrl(image.imageUrl)}
                       alt={`Product ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -175,7 +178,7 @@ export default function ProductDetailPage() {
 
             <QuickBuy
               productId={product.id}
-              imageUrl={product.images?.[0]?.imageUrl}
+              imageUrl={getImageUrl(product.images?.[0]?.imageUrl)}
               selectedVariant={selectedVariant}
               productName={product.name}
               price={price}
