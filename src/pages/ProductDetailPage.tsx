@@ -98,13 +98,9 @@ export default function ProductDetailPage() {
 
   const totalAmount = price * quantity;
 
-  console.log('Image URL from DB (raw):', product.images?.[0]?.imageUrl);
-  console.log('Current image index:', currentImageIndex);
-
   const currentImageUrl = product.images && product.images.length > 0
     ? getImageUrl(product.images[currentImageIndex].imageUrl)
-    : '/images/no-image.png';
-    console.log('Final currentImageUrl:', currentImageUrl);
+    : '/images/dummy_image.jpg';
 
   return (
     <div className="min-h-screen bg-gray-50">

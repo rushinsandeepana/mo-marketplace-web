@@ -1,5 +1,5 @@
 export const getImageUrl = (imagePath: string | undefined | null): string => {
-  if (!imagePath) return '/images/no-image.png';
+  if (!imagePath) return '/images/dummy_image.jpg';
   
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
     return imagePath;

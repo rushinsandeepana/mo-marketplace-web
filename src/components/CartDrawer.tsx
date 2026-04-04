@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { cartStore, type CartItem } from '../store/cart.store';
 import { ordersApi } from '../api/orders.api';
+import { getImageUrl } from '../utils/imageUtils';
 
 interface Props {
   open: boolean;
@@ -104,9 +105,12 @@ export default function CartDrawer({ open, onClose }: Props) {
               >
                 {item.imageUrl && (
                   <img
-                    src={`${import.meta.env.VITE_BACKEND_API_URL}${item.imageUrl}`}
+                    src={getImageUrl(item.imageUrl)}
                     alt={item.productName}
                     className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/dummy_image.jpg';
+                    }}
                   />
                 )}
                 <div className="flex-1 min-w-0">

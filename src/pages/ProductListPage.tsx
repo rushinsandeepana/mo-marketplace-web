@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import { productsApi } from '../api/products.api';
 import type { Product } from '../api/products.api';
 import Navbar from '../components/Navbar';
+import { getImageUrl } from '../utils/imageUtils';
 
 export default function ProductListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     productsApi
@@ -17,13 +17,6 @@ export default function ProductListPage() {
       .catch(() => setError('Failed to load products'))
       .finally(() => setLoading(false));
   }, []);
-
-  const getProductImage = (product: Product) => {
-    if (product.images && product.images.length > 0) {
-      return `${BASE_URL}${product.images[0].imageUrl}`;
-    }
-    return '/images/dummy_image.jpg';
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -69,7 +62,7 @@ export default function ProductListPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {products.map((product) => {
             const inStock = product.variants.some((v) => v.stock > 0);
-            const imageUrl = getProductImage(product);
+            const imageUrl = getImageUrl(product.images?.[0]?.imageUrl);
                         
             return (
               <Link
@@ -82,6 +75,9 @@ export default function ProductListPage() {
                     src={imageUrl}
                     alt={product.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/dummy_image.jpg';
+                    }}
                   />
                 </div>
                 

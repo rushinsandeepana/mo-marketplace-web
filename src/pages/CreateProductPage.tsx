@@ -114,9 +114,9 @@ export default function CreateProductPage() {
     setServerError('');
     try {
       const payload = transformToApiPayload(data);
-      const product = await productsApi.create(payload);
+      await productsApi.create(payload);
       imagePreviews.forEach(preview => URL.revokeObjectURL(preview));
-      navigate(`/products/${product.id}`);
+      navigate('/products');
     } catch (err: any) {
       const msg = err.response?.data?.message;
       setServerError(
