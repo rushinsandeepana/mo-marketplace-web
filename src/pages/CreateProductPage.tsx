@@ -6,18 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { productsApi } from '../api/products.api';
 import Navbar from '../components/Navbar';
 
-const variantSchema = z.object({
-  color: z.string().optional(),
-  size: z.string().optional(),
-  material: z.string().optional(),
-  stock: z.coerce.number().int().min(0, 'Stock must be 0 or more'),
-
-  priceOverride: z.preprocess(
-    (val) => (val === '' ? undefined : val),
-    z.number().positive().optional()
-  ),
-});
-
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
