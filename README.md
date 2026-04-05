@@ -276,3 +276,14 @@ npm run dev
 - Zod used for frontend form validation
 - Backend runs on port 3000
 - Frontend runs on port 5173
+
+---
+
+## Deployment
+
+| Service | URL |
+|--------|-----|
+| Public | https://mo-marketplace-web.vercel.app/ |
+| Backend API | https://mo-marketplace-api-production-e752.up.railway.app/ |
+
+---
